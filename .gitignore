@@ -102,3 +102,9 @@ dist
 # Gatsby files
 .cache/
 # Comment in the
+
+.omc/
+
+AGENT.md
+CLAUDE.md 
+GEMINI.md 
