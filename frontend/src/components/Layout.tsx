@@ -24,7 +24,7 @@ const Layout: React.FC = () => {
     <div className="layout">
       <nav className="navbar">
         <div className="navbar-brand">
-          <Link to="/projects">JIRA Clone</Link>
+          <Link to="/projects">PMGT</Link>
         </div>
         <button className="navbar-toggle" onClick={toggleMenu} aria-label="Toggle menu">
           {menuOpen ? '✕' : '☰'}

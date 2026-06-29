@@ -8,6 +8,7 @@ import userRoutes from './routes/userRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import issueRoutes from './routes/issueRoutes.js';
 import sprintRoutes from './routes/sprintRoutes.js';
+import mcpRoutes from './routes/mcpRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import prisma from './config/database.js';
 
@@ -91,6 +92,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/issues', issueRoutes);
 app.use('/api/sprints', sprintRoutes);
+app.use('/api/mcp', mcpRoutes);
 
 // Health check with DB status
 app.get('/health', async (req, res) => {

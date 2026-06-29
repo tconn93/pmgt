@@ -1,5 +1,6 @@
 import prisma from '../config/database.js';
 import { hashPassword } from '../utils/auth.js';
+import crypto from 'crypto';
 
 export const getAllUsers = async (req, res, next) => {
   try {
@@ -175,6 +176,78 @@ export const deleteUser = async (req, res, next) => {
     });
 
     res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ── API Key Management ──
+
+export const generateApiKey = async (req, res, next) => {
+  try {
+    // Users can only generate keys for themselves (admins can generate for anyone)
+    const targetId = req.params.id || req.user.id;
+
+    if (req.user.id !== targetId && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    // Generate a secure random API key
+    const apiKey = `pmgt_${crypto.randomBytes(32).toString('hex')}`;
+
+    const user = await prisma.user.update({
+      where: { id: targetId },
+      data: { apiKey },
+      select: { id: true, email: true, name: true, role: true }
+    });
+
+    res.json({ user, apiKey });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const revokeApiKey = async (req, res, next) => {
+  try {
+    const targetId = req.params.id || req.user.id;
+
+    if (req.user.id !== targetId && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    await prisma.user.update({
+      where: { id: targetId },
+      data: { apiKey: null }
+    });
+
+    res.json({ message: 'API key revoked' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getApiKeyStatus = async (req, res, next) => {
+  try {
+    const targetId = req.params.id || req.user.id;
+
+    if (req.user.id !== targetId && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: targetId },
+      select: { id: true, apiKey: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      hasApiKey: !!user.apiKey,
+      // Only show the last 8 chars for safety in UI
+      keyPreview: user.apiKey ? `...${user.apiKey.slice(-8)}` : null
+    });
   } catch (error) {
     next(error);
   }
